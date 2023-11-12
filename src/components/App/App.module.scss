@@ -1,7 +1,5 @@
 @import-normalize;
 
-$color: red;
-
 body {
   background-color: rgba(243, 247, 250, 1);
 }
@@ -14,8 +12,6 @@ body {
   padding-top: 20px;
 }
 
-.aviasales {
-}
 
 .logo {
   width: 60px;
@@ -48,7 +44,6 @@ body {
   overflow: hidden;
   
 }
-
 
 @keyframes planeFligth {
   0% {
