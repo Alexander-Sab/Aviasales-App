@@ -7,7 +7,7 @@ import classes from './CategoryFilterTicket.module.scss'
 
 export const CategoryFilterTicket = () => {
   const filtersState = useSelector((state) => state.filters)
-  const selectedFilter = filtersState?.selectedFilter || ''
+  const selectedFilter = filtersState?.selectedFilter || 'optimal'
   const dispatch = useDispatch()
 
   const handleFilterClick = (filter) => {

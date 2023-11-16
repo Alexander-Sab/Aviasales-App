@@ -1,7 +1,12 @@
 import axios from 'axios'
-import { v1 as uuidv1 } from 'uuid'
 
 const baseUrl = 'https://aviasales-test-api.kata.academy'
+
+const generateTicketId = (ticket) => {
+  const { price, time, airline } = ticket
+  const id = `${price}-${time}-${airline}`
+  return id
+}
 
 export const fetchTickets = () => async (dispatch) => {
   try {
@@ -17,7 +22,7 @@ export const fetchTickets = () => async (dispatch) => {
         const { tickets: newTickets, stop: newStop } = ticketsResponse.data
         const ticketsWithId = newTickets.map((ticket) => ({
           ...ticket,
-          id: uuidv1(),
+          id: generateTicketId(ticket),
         }))
         tickets = [...tickets, ...ticketsWithId]
         stop = newStop

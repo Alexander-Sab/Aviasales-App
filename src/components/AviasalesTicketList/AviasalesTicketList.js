@@ -1,5 +1,4 @@
 import clsx from 'clsx'
-import { v1 as uuidv1 } from 'uuid'
 
 import { formatDuration, formatTimeRange, formatStops } from '../../utils/utils'
 
@@ -27,10 +26,7 @@ export const AviasalesTicketList = ({ ticket }) => {
   const stopsText2 = formatStops(segment2.stops)
 
   return (
-    <section
-      key={uuidv1()}
-      className={clsx(classes.aviasales__ticket, classes.ticket)}
-    >
+    <section className={clsx(classes.aviasales__ticket, classes.ticket)}>
       <div className={clsx(classes.ticket__header)}>
         <div className={clsx(classes.ticket__price)}>{price} Р</div>
         <img

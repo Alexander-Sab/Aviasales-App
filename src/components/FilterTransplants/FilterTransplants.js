@@ -1,7 +1,6 @@
 import clsx from 'clsx'
 import { useSelector, useDispatch } from 'react-redux'
 
-import { getTickets } from '../../services/AviasalesServices'
 import {
   setCheckboxValue,
   toggleAllCheckbox,
@@ -15,24 +14,33 @@ export const FilterTransplants = () => {
 
   const handleCheckboxChange = (checkboxName) => {
     if (checkboxName === 'all') {
-      dispatch(toggleAllCheckbox(!checkboxes.all))
+      const newValue = !checkboxes.all
+      dispatch(toggleAllCheckbox(newValue))
+      dispatch(setCheckboxValue('withoutTransfers', newValue))
+      dispatch(setCheckboxValue('oneTransfer', newValue))
+      dispatch(setCheckboxValue('twoTransfers', newValue))
+      dispatch(setCheckboxValue('threeTransfers', newValue))
     } else {
       const newValue = !checkboxes[checkboxName]
       dispatch(setCheckboxValue(checkboxName, newValue))
-      if (checkboxName === 'withoutTransfers') {
-        dispatch(setCheckboxValue('withoutTransfers', newValue))
-      }
-      if (checkboxName === 'oneTransfer') {
-        dispatch(setCheckboxValue('oneTransfer', newValue))
-      }
-      if (checkboxName === 'twoTransfers') {
-        dispatch(setCheckboxValue('twoTransfers', newValue))
-      }
-      if (checkboxName === 'threeTransfers') {
-        dispatch(setCheckboxValue('threeTransfers', newValue))
+      if (
+        !newValue &&
+        checkboxes.withoutTransfers &&
+        checkboxes.oneTransfer &&
+        checkboxes.twoTransfers &&
+        checkboxes.threeTransfers
+      ) {
+        dispatch(toggleAllCheckbox(false))
+      } else if (
+        newValue &&
+        checkboxes.withoutTransfers &&
+        checkboxes.oneTransfer &&
+        checkboxes.twoTransfers &&
+        checkboxes.threeTransfers
+      ) {
+        dispatch(toggleAllCheckbox(true))
       }
     }
-    dispatch(getTickets())
   }
 
   const checkboxItems = [
