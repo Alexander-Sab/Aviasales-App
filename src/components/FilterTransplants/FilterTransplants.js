@@ -23,22 +23,16 @@ export const FilterTransplants = () => {
     } else {
       const newValue = !checkboxes[checkboxName]
       dispatch(setCheckboxValue(checkboxName, newValue))
-      if (
-        !newValue &&
-        checkboxes.withoutTransfers &&
-        checkboxes.oneTransfer &&
-        checkboxes.twoTransfers &&
-        checkboxes.threeTransfers
-      ) {
-        dispatch(toggleAllCheckbox(false))
-      } else if (
-        newValue &&
-        checkboxes.withoutTransfers &&
-        checkboxes.oneTransfer &&
-        checkboxes.twoTransfers &&
-        checkboxes.threeTransfers
-      ) {
+
+      // Проверяем, все ли остальные чекбоксы отмечены
+      const allOtherCheckboxesChecked = Object.keys(checkboxes)
+        .filter((key) => key !== 'all' && key !== checkboxName)
+        .every((key) => checkboxes[key])
+
+      if (newValue && allOtherCheckboxesChecked) {
         dispatch(toggleAllCheckbox(true))
+      } else if (!newValue && checkboxes.all) {
+        dispatch(toggleAllCheckbox(false))
       }
     }
   }

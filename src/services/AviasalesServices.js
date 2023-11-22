@@ -1,52 +1,106 @@
-import axios from 'axios'
+/* eslint-disable no-await-in-loop */
 
-const baseUrl = 'https://aviasales-test-api.kata.academy'
+const MAX_RETRIES = 3
+const DELAY = 1000
 
-const generateTicketId = (ticket) => {
-  const { price, time, airline } = ticket
-  const id = `${price}-${time}-${airline}`
-  return id
-}
+export const FETCH_TICKETS_START = 'FETCH_TICKETS_START'
 
-export const fetchTickets = () => async (dispatch) => {
-  try {
-    const searchIdResponse = await axios.get(`${baseUrl}/search`)
-    const { searchId } = searchIdResponse.data
-    let tickets = []
-    let stop = false
-    while (!stop) {
-      try {
-        const ticketsResponse = await axios.get(
-          `${baseUrl}/tickets?searchId=${searchId}`,
-        )
-        const { tickets: newTickets, stop: newStop } = ticketsResponse.data
-        const ticketsWithId = newTickets.map((ticket) => ({
-          ...ticket,
-          id: generateTicketId(ticket),
-        }))
-        tickets = [...tickets, ...ticketsWithId]
-        stop = newStop
-      } catch (error) {
-        // Игнорирование ошибки net::ERR_CONNECTION_TIMED_OUT и ошибки с кодом 500
-        if (error.code !== 'ECONNABORTED' && error.response.status !== 500) {
-          throw error
-        }
-      }
-    }
-    //console.log('tickets:', tickets) // Вывод всех билетов в консоль
-    dispatch({ type: 'FETCH_TICKETS_SUCCESS', payload: tickets })
-  } catch (error) {
-    dispatch({ type: 'FETCH_TICKETS_FAILURE', payload: error.message })
+function fetchTicketsStart() {
+  return {
+    type: FETCH_TICKETS_START,
   }
 }
 
-export const getTickets = () => async (dispatch) => {
-  try {
-    dispatch({ type: 'FETCH_TICKETS_REQUEST' })
-    await dispatch(fetchTickets())
-    dispatch({ type: 'FETCH_TICKETS_COMPLETE' })
-  } catch (error) {
-    dispatch({ type: 'FETCH_TICKETS_ERROR', payload: error.message })
+export const FETCH_TICKETS_SUCCESS = 'FETCH_TICKETS_SUCCESS'
+
+function fetchTicketsSuccess(tickets) {
+  return {
+    type: FETCH_TICKETS_SUCCESS,
+    tickets,
+  }
+}
+
+export const FETCH_TICKETS_ERROR = 'FETCH_TICKETS_ERROR'
+
+function fetchTicketsError(error) {
+  return {
+    type: FETCH_TICKETS_ERROR,
+    error,
+  }
+}
+
+export const ADD_ITEMS_TO_RENDER = 'ADD_ITEMS_TO_RENDER'
+
+export function addItemsToRender(count) {
+  return {
+    type: ADD_ITEMS_TO_RENDER,
+    count,
+  }
+}
+
+async function fetchWithRetries(url, retries = MAX_RETRIES) {
+  let lastError = null
+
+  for (let i = 0; i < retries; i += 1) {
+    try {
+      const response = await fetch(url)
+
+      if (response.ok) {
+        return response
+      }
+
+      if (i < retries - 1) {
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve()
+          }, DELAY)
+        })
+      }
+    } catch (error) {
+      lastError = error
+      if (i < retries - 1) {
+        await new Promise((resolve) => {
+          setTimeout(() => {
+            resolve()
+          }, DELAY)
+        })
+      }
+    }
+  }
+
+  throw lastError
+}
+export function getTickets() {
+  return async (dispatch) => {
+    dispatch(fetchTicketsStart())
+    try {
+      const searchResponse = await fetchWithRetries(
+        'https://aviasales-test-api.kata.academy/search',
+      )
+      const searchData = await searchResponse.json()
+      const { searchId } = searchData
+      let stop = false
+      const allTickets = []
+      while (!stop) {
+        const ticketsResponse = await fetchWithRetries(
+          `https://aviasales-test-api.kata.academy/tickets?searchId=${searchId}`,
+        )
+        const ticketsData = await ticketsResponse.json()
+
+        // Генерация идентификатора для каждого билета
+        const ticketsWithId = ticketsData.tickets.map((ticket) => ({
+          ...ticket,
+        }))
+
+        allTickets.push(...ticketsWithId)
+        stop = ticketsData.stop
+      }
+      dispatch(fetchTicketsSuccess(allTickets))
+    } catch (error) {
+      dispatch(
+        fetchTicketsError(error ? error.toString() : 'Неизвестная ошибка'),
+      )
+    }
   }
 }
 

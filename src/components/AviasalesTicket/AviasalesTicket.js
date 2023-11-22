@@ -39,6 +39,11 @@ export const AviasalesTicket = () => {
   const handleShowMoreTickets = () => {
     setDisplayedTickets((prevDisplayedTickets) => prevDisplayedTickets + 5)
   }
+  function generateTicketId(ticket) {
+    const { price, time, airline } = ticket
+    const id = `${price}${time}${airline}`
+    return id
+  }
 
   return (
     <>
@@ -77,9 +82,10 @@ export const AviasalesTicket = () => {
         </div>
       ) : (
         <>
-          {filteredAndSortedTickets.slice(0, displayedTickets).map((ticket) => (
-            <AviasalesTicketList ticket={ticket} key={ticket.id} />
-          ))}
+          {filteredAndSortedTickets.slice(0, displayedTickets).map((ticket) => {
+            const ticketId = generateTicketId(ticket)
+            return <AviasalesTicketList ticket={ticket} key={ticketId} />
+          })}
           <button
             className={clsx(classes['aviasales__show-more'])}
             onClick={handleShowMoreTickets}
