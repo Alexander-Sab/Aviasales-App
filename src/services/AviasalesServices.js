@@ -65,6 +65,14 @@ async function fetchWithRetries(url, retries = MAX_RETRIES) {
           }, DELAY)
         })
       }
+      // Игнорирование ошибки net::ERR_CONNECTION_TIMED_OUT и ошибки с кодом 500
+      if (
+        error.code !== 'ECONNABORTED' &&
+        error.response &&
+        error.response.status !== 500
+      ) {
+        throw error
+      }
     }
   }
 
@@ -80,22 +88,19 @@ export function getTickets() {
       const searchData = await searchResponse.json()
       const { searchId } = searchData
       let stop = false
-      const allTickets = []
       while (!stop) {
         const ticketsResponse = await fetchWithRetries(
           `https://aviasales-test-api.kata.academy/tickets?searchId=${searchId}`,
         )
         const ticketsData = await ticketsResponse.json()
-
-        // Генерация идентификатора для каждого билета
-        const ticketsWithId = ticketsData.tickets.map((ticket) => ({
-          ...ticket,
-        }))
-
-        allTickets.push(...ticketsWithId)
+        if (ticketsData.tickets.length > 0) {
+          const ticketsWithId = ticketsData.tickets.map((ticket) => ({
+            ...ticket,
+          }))
+          dispatch(fetchTicketsSuccess(ticketsWithId))
+        }
         stop = ticketsData.stop
       }
-      dispatch(fetchTicketsSuccess(allTickets))
     } catch (error) {
       dispatch(
         fetchTicketsError(error ? error.toString() : 'Неизвестная ошибка'),

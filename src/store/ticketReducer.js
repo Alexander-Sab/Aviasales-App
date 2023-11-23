@@ -1,4 +1,4 @@
-/* eslint-disable default-param-last */
+// ticketsReducer.js
 import {
   FETCH_TICKETS_START,
   FETCH_TICKETS_SUCCESS,
@@ -21,27 +21,23 @@ function ticketsReducer(state = initialState, action) {
         loading: true,
         error: null,
       }
-
     case FETCH_TICKETS_SUCCESS:
       return {
         ...state,
         loading: false,
         tickets: action.tickets,
       }
-
     case FETCH_TICKETS_ERROR:
       return {
         ...state,
         loading: false,
         error: action.error,
       }
-
     case ADD_ITEMS_TO_RENDER:
       return {
         ...state,
         renderedItemsCount: state.renderedItemsCount + action.count,
       }
-
     default:
       return state
   }

@@ -35,7 +35,6 @@ export const AviasalesTicket = () => {
     const filtered = filterTickets(tickets, selectedFilters)
     return sortTickets(filtered, selectedFilter)
   }, [tickets, selectedFilters, selectedFilter])
-
   const handleShowMoreTickets = () => {
     setDisplayedTickets((prevDisplayedTickets) => prevDisplayedTickets + 5)
   }
