@@ -25,7 +25,7 @@ function ticketsReducer(state = initialState, action) {
       return {
         ...state,
         loading: false,
-        tickets: action.tickets,
+        tickets: [...state.tickets, ...action.tickets],
       }
     case FETCH_TICKETS_ERROR:
       return {

@@ -11,6 +11,7 @@ import classes from './AviasalesTicket.module.scss'
 
 export const AviasalesTicket = () => {
   const { tickets, error } = useSelector((state) => state.tickets)
+  console.log('tickets', tickets)
   const [isTicketsLoading, setIsTicketsLoading] = useState(true)
   const selectedFilters = useSelector((state) => state.checkboxes)
   const selectedFilter = useSelector((state) => state.filters.selectedFilter)
@@ -18,15 +19,16 @@ export const AviasalesTicket = () => {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const fetchTickets = async () => {
-      try {
-        setIsTicketsLoading(true)
-        await dispatch(getTickets())
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsTicketsLoading(false)
-      }
+    const fetchTickets = () => {
+      setIsTicketsLoading(true)
+      dispatch(getTickets())
+        .then(() => {
+          setIsTicketsLoading(false)
+        })
+        .catch((error) => {
+          console.error(error)
+          setIsTicketsLoading(false)
+        })
     }
     fetchTickets()
   }, [dispatch])
